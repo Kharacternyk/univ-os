@@ -1,29 +1,59 @@
 ---
-title: "lab-1"
+title: Лабораторна робота №1
 output: html_document
+author: Назар Віннічук
 date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## Збір даних
+
+Для збору даних було виконано наступну команду в оболонці `bash` на стаціонарному ПК з ОС Linux (дистрибутив NixOS).
+
+```bash
+sudo find / -not '(' -path /sys -prune ')' -not '(' -path /proc -prune ')' -type f -printf '%s\n' > lab-1.data
 ```
 
-## R Markdown
+Ця команда ігнорує вміст каталогів `/sys` та `/proc`, адже їх вміст генерується лише в момент читання з них.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Також, `-type f` запобігає потрапляння розмірів каталогів та символьних посилань до набору даних.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Аналіз даних
 
-```{r cars}
-summary(cars)
+```{r}
+library(readr)
+file_sizes <- read_csv('lab-1.data', col_names=F, show_col_types=F)$X1
+length(file_sizes)
+summary(file_sizes)
+hist(file_sizes)
 ```
 
-## Including Plots
+Гістограма без перетворення даних геть не інформативна.
+Спробуємо натомість побудувати гістограму
+порядку розмірів, а саме двійкового логарифму. 
+При цьому вважатимемо порожні файли такими, що мають порядок розміру 0.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+log_file_sizes = log2(file_sizes)
+log_file_sizes[log_file_sizes == -Inf] <- 0
+hist(log_file_sizes)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Визначимо функцію, що малюватиме гістограму з відсотковими ординатами.
+
+```{r}
+percentage <- function(h, ...) {
+  h$density = h$counts / sum(h$counts) * 100
+  plot(h, ylab='Percentage', freq=F, ...)
+}
+percentage(hist(log_file_sizes, plot=F))
+```
+
+Керуючись діаграмою порядків розмірів, виставимо межі стовпчиків на діаграмі розмірів так, щоб висота одного з них перевищувала 80%, а його ширина була якомога меншою.
+
+```{r}
+percentage(hist(file_sizes, plot=F, breaks=c(0, 7500, max(file_sizes))), xlim=c(0, 10000))
+```
+
+## Висновок
+
+Переважна більшість файлів, а саме більше 80%, має розмір менший за 7500 байт.
