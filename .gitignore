@@ -1,3 +1,6 @@
+result
+*.html
+
 .Rproj.user
 .Rhistory
 .RData
