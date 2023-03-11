@@ -1,11 +1,5 @@
 FROM nixos/nix
-
-RUN nix-channel --update
-RUN nix-env -iA nixpkgs.sl
-RUN sl
-
-#FROM rocker/r-rmd
-#WORKDIR /R
-#COPY . .
-#RUN apt install --yes r-cran-readr
-#RUN Rscript -e 'rmarkdown::render("lab-1.Rmd")'
+RUN echo "\nexperimental-features = nix-command flakes" >> /etc/nix/nix.conf
+WORKDIR /web
+COPY . .
+RUN nix shell nixpkgs#hello -c hello
