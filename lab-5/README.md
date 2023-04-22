@@ -13,10 +13,9 @@ $ ./readchar
 0x7fffffffbdf7
 X
 Y
-Z
 ```
 
 ```
 $ ./memspy /proc/19541/mem 0x7fffffffbdf7
-Z
+Y
 ```
