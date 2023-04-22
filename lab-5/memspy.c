@@ -12,8 +12,10 @@ int main(int argc, char **argv) {
   size_t address = strtol(argv[2], &endptr, 0);
   assert(!*endptr);
 
-  assert(lseek(fd, address, SEEK_SET) >= 0);
+  assert(lseek(fd, address, SEEK_SET) == address);
+
   char byte;
   assert(read(fd, &byte, 1) == 1);
-  assert(write(1, &byte, 1));
+  assert(write(1, &byte, 1) == 1);
+  assert(write(1, "\n", 1) == 1);
 }
