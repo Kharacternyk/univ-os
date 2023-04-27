@@ -15,13 +15,13 @@ void *start(void *argument) {
 
   for (int i = 0; i < 100000; ++i) {
     if (counter->is_synced) {
-      sem_wait(&counter->semaphore);
+      assert(sem_wait(&counter->semaphore) == 0);
     }
 
     ++counter->value;
 
     if (counter->is_synced) {
-      sem_post(&counter->semaphore);
+      assert(sem_post(&counter->semaphore) == 0);
     }
   }
 
@@ -39,11 +39,11 @@ int main(int argc, char **argv) {
   pthread_t threads[2];
 
   for (int i = 0; i < 2; ++i) {
-    pthread_create(threads + i, NULL, start, &counter);
+    assert(pthread_create(threads + i, NULL, start, &counter) == 0);
   }
 
   for (int i = 0; i < 2; ++i) {
-    pthread_join(threads[i], NULL);
+    assert(pthread_join(threads[i], NULL) == 0);
   }
 
   printf("%d\n", counter.value);
