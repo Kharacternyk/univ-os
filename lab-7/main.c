@@ -1,12 +1,13 @@
 #include <assert.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdio.h>
+#include <sys/prctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 int f(int x) {
-  for (;;)
-    ;
+  sleep(10);
   return x;
 }
 
@@ -26,16 +27,16 @@ int main() {
   int g_fds[2];
   assert(socketpair(AF_UNIX, SOCK_STREAM, 0, g_fds) == 0);
 
-  pid_t pid = fork();
-  assert(pid >= 0);
-  if (pid == 0) {
+  pid_t f_pid = fork();
+  assert(f_pid >= 0);
+  if (f_pid == 0) {
     child_main(f_fds[1], f);
     return 0;
   }
 
-  pid = fork();
-  assert(pid >= 0);
-  if (pid == 0) {
+  pid_t g_pid = fork();
+  assert(g_pid >= 0);
+  if (g_pid == 0) {
     child_main(g_fds[1], g);
     return 0;
   }
@@ -80,11 +81,16 @@ int main() {
       int seconds = 0;
       if (scanf("%d", &seconds) == EOF) {
         printf("\n");
-        return 0;
+        break;
       }
       timeout = seconds * 1000;
     }
   }
 
-  printf("%d\n", results[0] * results[1]);
+  kill(f_pid, SIGKILL);
+  kill(g_pid, SIGKILL);
+
+  if (got_results == 2) {
+    printf("%d\n", results[0] * results[1]);
+  }
 }
