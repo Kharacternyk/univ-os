@@ -63,7 +63,10 @@ void philosopher_main(struct philosopher *philosopher) {
         *philosopher->left_neighbour->left_neighbour->state != eating) {
       assert(sem_post(&philosopher->left_neighbour->own_semaphore) == 0);
     }
-    if (*philosopher->right_neighbour->state == hungry &&
+    if (philosopher->right_neighbour != philosopher->left_neighbour &&
+        philosopher->right_neighbour->right_neighbour !=
+            philosopher->left_neighbour &&
+        *philosopher->right_neighbour->state == hungry &&
         *philosopher->right_neighbour->right_neighbour->state != eating) {
       assert(sem_post(&philosopher->right_neighbour->own_semaphore) == 0);
     }
